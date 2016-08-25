@@ -11,7 +11,7 @@
 
 namespace Seferov\AwsBundle\Services;
 
-use \Aws\Common\Aws;
+use Aws\Sdk;
 use \Seferov\AwsBundle\Entity\AWSCredentials;
 
 /**
@@ -66,8 +66,9 @@ class ServicesFactory
      */
     public function get(AWSCredentials $AWSCredentials, $service)
     {
-        $aws = Aws::factory($AWSCredentials->getParameters($service));
-
-        return $aws->get($service);
+        $params = $AWSCredentials->getParameters($service);
+        $sdk = new \Aws\Sdk($params);
+        $createService = 'create' . $service;
+        return $sdk->$createService();
     }
 }

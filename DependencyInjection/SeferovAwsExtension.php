@@ -31,7 +31,7 @@ class SeferovAwsExtension extends Extension
     /**
      * @var array
      */
-    public $configKeys = array('key', 'secret', 'region', 'profile');
+    public $configKeys = array('credentials' => array('key', 'secret'), 'region' => null, 'version' => null, 'profile' => null);
 
     /**
      * @param array            $configs
@@ -53,9 +53,16 @@ class SeferovAwsExtension extends Extension
 
         // Base config
         $baseConfig = array();
-        foreach ($this->configKeys as $configKey) {
+        foreach ($this->configKeys as $configKey => $array) {
             $baseConfig[$configKey] = array_key_exists($configKey, $config) && $config[$configKey] ? $config[$configKey] : null;
             $container->setParameter(self::SERVICE_NAMESPACE.'.'.$configKey, $config[$configKey]);
+            if (!empty($array)) {
+                foreach ($array as $key) {
+                    $baseConfig[$configKey][$key] = array_key_exists($key, $baseConfig[$configKey]) && $baseConfig[$configKey][$key] ?
+                        $baseConfig[$configKey][$key] : null;
+                    $container->setParameter(self::SERVICE_NAMESPACE.'.'.$configKey.'.'.$key, $baseConfig[$configKey][$key]);
+                }
+            }
         }
 
         foreach (ServicesFactory::$AVAILABLE_SERVICES as $service) {
